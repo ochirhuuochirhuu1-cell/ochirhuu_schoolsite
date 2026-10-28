@@ -126,12 +126,35 @@ def news():
 @app.route("/contact")
 def contact():
     return render_template("contact.html", title="Холбоо барих")
-
-# Анхны админ үүсгэх: командын мөрөөс `flask --app app create-admin` ажиллуулна.
 @app.cli.command("create-admin")
 def create_admin():
-    username = os.environ.get("ADMIN_USERNAME")
-password = os.environ.get("ADMIN_PASSWORD")
+    import getpass
+    init_db()
+username = input("Админ хэрэглэгчийн нэр: ").strip()
+    password = getpass.getpass("Шинэ нууц үг (дор хаяж 12 тэмдэгт): ")
+    confirm = getpass.getpass("Нууц үгээ давтан оруулна уу: ")
+    if len(password) < 12:
+        print("Алдаа: нууц үг дор хаяж 12 тэмдэгт байх ёстой.")
+        return
+    if password != confirm:
+        print("Алдаа: нууц үг таарахгүй байна.")
+        return
+    if not username:
+        print("Алдаа: хэрэглэгчийн нэр хоосон байна.")
+        return
+    conn = get_db()
+    try:
+        conn.execute("INSERT INTO admins (username, password_hash, created_at) VALUES (?, ?, ?)",
+                     (username, generate_password_hash(password), datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        conn.commit()
+        print("Админ амжилттай үүслээ. /admin/login хаягаар нэвтэрнэ үү.")
+    except sqlite3.IntegrityError:
+        print("Энэ хэрэглэгчийн нэр аль хэдийн бүртгэлтэй байна.")
+    finally:
+@app.cli.command("create-admin")
+def create_admin():
+    username = os.environ.get("ochir")
+password = os.environ.get("ochirjk12345")
 
 if username and password:
     existing = conn.execute(
