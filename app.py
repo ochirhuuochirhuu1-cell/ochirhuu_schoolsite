@@ -126,6 +126,7 @@ def news():
 @app.route("/contact")
 def contact():
     return render_template("contact.html", title="Холбоо барих")
+    
 @app.cli.command("create-admin")
 def create_admin():
     init_db()
