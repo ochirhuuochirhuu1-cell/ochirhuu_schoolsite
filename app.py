@@ -130,8 +130,9 @@ def contact():
 @app.cli.command("create-admin")
 def create_admin():
     init_db()
-    admin_username = os.environ.get("ochir")
-admin_password = os.environ.get("ochirjk12345")
+    import os
+admin_username = os.environ.get("ADMIN_USERNAME", "ochir")
+admin_password = os.environ.get("ADMIN_PASSWORD", "ochirjk12345")
 
 if admin_username and admin_password:
     existing = conn.execute(
