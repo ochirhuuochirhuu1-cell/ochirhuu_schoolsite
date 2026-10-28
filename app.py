@@ -130,32 +130,40 @@ def contact():
 @app.cli.command("create-admin")
 def create_admin():
     init_db()
+
     import os
-admin_username = os.environ.get("ADMIN_USERNAME", "ochir")
-admin_password = os.environ.get("ADMIN_PASSWORD", "ochirjk12345")
 
-if admin_username and admin_password:
-    existing = conn.execute(
-        "SELECT id FROM admins WHERE username = ?",
-        (admin_username,)
-    ).fetchone()
+    admin_username = os.environ.get("ADMIN_USERNAME", "ochir")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "ochirjk12345")
 
-    if not existing:
-        conn.execute(
-            """
-            INSERT INTO admins
-            (username, password_hash, created_at)
-            VALUES (?, ?, ?)
-            """,
-            (
-                admin_username,
-                generate_password_hash(admin_password),
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if not admin_password:
+        print("ADMIN_PASSWORD тохируулаагүй байна.")
+        return
+
+    conn = get_db()
+
+    try:
+        existing = conn.execute(
+            "SELECT id FROM admins WHERE username = ?",
+            (admin_username,)
+        ).fetchone()
+
+        if not existing:
+            conn.execute(
+                """
+                INSERT INTO admins
+                (username, password_hash, created_at)
+                VALUES (?, ?, ?)
+                """,
+                (
+                    admin_username,
+                    generate_password_hash(admin_password),
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                )
             )
-        )
-        
+            conn.commit()
+    finally:
         conn.close()
-
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if "admin_id" in session:
