@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% block content %}
+<section class="admin-page"><div class="container">
+<div class="admin-top"><div><span class="eyebrow">ADMIN PANEL</span><h1>Элсэлтийн бүртгэлүүд</h1><p>Сайн байна уу, {{ session.get('admin_username', 'админ') }}.</p></div>
+<form method="POST" action="{{ url_for('admin_logout') }}"><button class="btn btn-outline-dark" type="submit">Системээс гарах</button></form></div>
+<div class="admin-stats"><div class="stat-card"><span>Нийт бүртгүүлэгч</span><strong>{{ total }}</strong></div><div class="stat-card"><span>Хайлтын үр дүн</span><strong>{{ applications|length }}</strong></div></div>
+<div class="table-card"><div class="table-heading"><div><h2>Бүртгүүлэгчдийн жагсаалт</h2><p>Нэр, утас, и-мэйл эсвэл мэргэжлээр хайна.</p></div>
+<form class="search-form" method="GET" action="{{ url_for('admin_dashboard') }}"><input type="search" name="q" value="{{ q }}" placeholder="Хайх утга..."><button class="btn btn-primary" type="submit">Хайх</button>{% if q %}<a class="btn btn-muted" href="{{ url_for('admin_dashboard') }}">Арилгах</a>{% endif %}</form></div>
+<div class="table-scroll"><table><thead><tr><th>ID</th><th>Овог, нэр</th><th>Утас</th><th>И-мэйл</th><th>Мэргэжил</th><th>Сургууль</th><th>Бүртгэсэн огноо</th><th>Үйлдэл</th></tr></thead><tbody>
+{% for item in applications %}<tr><td>#{{ item.id }}</td><td class="name-cell">{{ item.full_name }}</td><td>{{ item.phone }}</td><td>{{ item.email or '—' }}</td><td>{{ item.program }}</td><td>{{ item.school or '—' }}</td><td>{{ item.created_at }}</td><td><form method="POST" action="{{ url_for('delete_application', application_id=item.id) }}" onsubmit="return confirm('Энэ бүртгэлийг бүрмөсөн устгах уу?');"><input type="hidden" name="q" value="{{ q }}"><button class="btn btn-danger btn-small" type="submit">Устгах</button></form></td></tr>
+{% else %}<tr><td colspan="8" class="empty-state">{% if q %}Хайлтад тохирох бүртгэл олдсонгүй.{% else %}Одоогоор бүртгэл байхгүй байна.{% endif %}</td></tr>{% endfor %}
+</tbody></table></div></div>
+<div class="admin-note">Зөвлөмж: бүртгүүлэгчдийн хувийн мэдээллийг зөвхөн эрх бүхий ажилтан ашиглана уу.</div>
+</div></section>{% endblock %}

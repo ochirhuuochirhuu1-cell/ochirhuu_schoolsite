@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block content %}
+<section class="admin-auth-wrap"><div class="admin-auth-card">
+<div class="admin-logo">ИЗ</div><span class="eyebrow">ADMINISTRATION</span><h1>Админ нэвтрэх</h1><p>Зөвхөн эрх бүхий ажилтан нэвтэрнэ.</p>
+<form method="POST" action="{{ url_for('admin_login') }}">
+<div class="form-group"><label>Хэрэглэгчийн нэр</label><input type="text" name="username" autocomplete="username" required autofocus></div>
+<div class="form-group"><label>Нууц үг</label><input type="password" name="password" autocomplete="current-password" required></div>
+<button class="btn btn-primary btn-full" type="submit">Нэвтрэх</button>
+</form><a class="text-link back-link" href="{{ url_for('home') }}">← Сайт руу буцах</a>
+</div></section>{% endblock %}

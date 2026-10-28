@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Их Засаг Политехник Коллеж{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+    <div class="hero-logo">
+        <img src="{{ url_for('static', filename='images/logo.png') }}"
+             alt="Их Засаг Политехник Коллежийн лого">
+    </div>
+
+    <div class="hero-content">
+        <p class="eyebrow">МЭРГЭЖЛИЙН БОЛОВСРОЛ</p>
+        <h1>Их Засаг Политехник Коллеж</h1>
+        <p class="hero-description">
+            Мэргэжилтэй ирээдүйг хамтдаа бүтээцгээе.
+            Өнөөдөр суралцаж, маргааш амжилтад хүр!
+        </p>
+        <a href="{{ url_for('admission') }}" class="primary-button">
+            Элсэх хүсэлт илгээх →
+        </a>
+    </div>
+</section>
+
+<section class="programs-section" id="programs">
+    <div class="section-heading">
+        <p class="eyebrow">БИДНИЙ САНАЛ БОЛГОХ СУРГАЛТ</p>
+        <h2>Эзэмших мэргэжлүүд</h2>
+        <p>Өөрийн сонирхол, ур чадварт тохирсон мэргэжлээ сонгоорой.</p>
+    </div>
+
+    <div class="program-grid">
+
+        <article class="program-card">
+            <img
+                src="{{ url_for('static', filename='images/software.jpg') }}"
+                alt="Компьютер дээр программ хөгжүүлж буй байдал">
+            <div class="program-info">
+                <span class="program-number">01</span>
+                <h3>Программ хангамж хөгжүүлэлт</h3>
+                <p>Вебсайт, программ болон дижитал шийдэл бүтээх ур чадвар эзэмшинэ.</p>
+            </div>
+        </article>
+
+        <article class="program-card">
+            <img
+                src="{{ url_for('static', filename='images/it.jpg') }}"
+                alt="Сервер болон мэдээллийн технологийн тоног төхөөрөмж">
+            <div class="program-info">
+                <span class="program-number">02</span>
+                <h3>Хувцас дизайн</h3>
+                <p>Хувцас загвар зохион бүтээх, эсгэх, оёх болон загварын дизайны ур чадвар эзэмшинэ.</p>
+            </div>
+        </article>
+
+        <article class="program-card">
+            <img
+                src="{{ url_for('static', filename='images/aircraft.jpg') }}"
+                alt="Агаарын хөлгийн техник үйлчилгээ">
+            <div class="program-info">
+                <span class="program-number">03</span>
+                <h3>Гоо сайхны үйлчилгээ</h3>
+                <p> Арьс арчилгаа, нүүр будалт болон гоо сайхны үйлчилгээ үзүүлэх ур чадвар эзэмшинэ.</p>
+            </div>
+        </article>
+
+        <article class="program-card">
+            <img
+                src="{{ url_for('static', filename='images/automotive.jpg') }}"
+                alt="Автомашины хөдөлгүүрт засвар үйлчилгээ хийж буй байдал">
+            <div class="program-info">
+                <span class="program-number">04</span>
+                <h3>Хоолны үйлчилгээ</h3>
+                <p>Хоол, хүнс бэлтгэх, амт чанартай хоол үйлдвэрлэх болон хоолны үйлчилгээ үзүүлэх ур чадвар эзэмшинэ.</p>
+            </div>
+        </article>
+
+    </div>
+</section>
+
+<section class="benefits-section">
+    <div class="section-heading">
+        <p class="eyebrow">БИДНИЙ ДАВУУ ТАЛ</p>
+        <h2>Яагаад манай коллежийг сонгох вэ?</h2>
+    </div>
+
+    <div class="benefits-grid">
+        <div class="benefit-item">
+            <span class="benefit-icon">🎓</span>
+            <h3>Суралцах боломж</h3>
+            <p>Мэргэжлийн мэдлэг, ур чадвараа хөгжүүлэх боломж.</p>
+        </div>
+
+        <div class="benefit-item">
+            <span class="benefit-icon">💡</span>
+            <h3>Практик сургалт</h3>
+            <p>Онолын мэдлэгээ дадлагаар бататгах сургалт.</p>
+        </div>
+
+        <div class="benefit-item">
+            <span class="benefit-icon">👥</span>
+            <h3>Туршлагатай багш</h3>
+            <p>Мэргэжлийн чиглэлийн сургалт, зөвлөгөө.</p>
+        </div>
+
+        <div class="benefit-item">
+            <span class="benefit-icon">🚀</span>
+            <h3>Ирээдүйн боломж</h3>
+            <p>Мэргэжлийн ур чадвараа хөгжүүлж, ажил мэргэжлийн замналаа эхлүүлэх боломж.</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
