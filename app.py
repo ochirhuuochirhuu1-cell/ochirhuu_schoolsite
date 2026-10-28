@@ -128,7 +128,6 @@ def contact():
     return render_template("contact.html", title="Холбоо барих")
 @app.cli.command("create-admin")
 def create_admin():
-    import getpass
     init_db()
     admin_username = os.environ.get("ochir")
 admin_password = os.environ.get("ochirjk12345")
