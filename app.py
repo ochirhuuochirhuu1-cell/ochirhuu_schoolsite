@@ -7,12 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = Path(
-    os.environ.get(
-        "DATABASE_PATH",
-        str(BASE_DIR / "database.db")
-    )
-)
+DB_PATH = BASE_DIR / "database.db"
 
 app = Flask(__name__)
 # Үйлдвэрлэлийн орчинд SECRET_KEY-г environment variable-аас тохируулна.
@@ -131,46 +126,36 @@ def news():
 @app.route("/contact")
 def contact():
     return render_template("contact.html", title="Холбоо барих")
-    
+
+# Анхны админ үүсгэх: командын мөрөөс `flask --app app create-admin` ажиллуулна.
 @app.cli.command("create-admin")
 def create_admin():
+    """Админы хэрэглэгч үүсгэнэ. Нууц үгийг терминал дээр нууж асууна."""
+    import getpass
     init_db()
-
-    import os
-
-    admin_username = os.environ.get("ADMIN_USERNAME")
-    admin_password = os.environ.get("ADMIN_PASSWORD")
-
-    if not admin_username or not admin_password:
-        print("ADMIN_USERNAME эсвэл ADMIN_PASSWORD тохируулаагүй байна.")
+    username = input("Админ хэрэглэгчийн нэр: ").strip()
+    password = getpass.getpass("Шинэ нууц үг (дор хаяж 12 тэмдэгт): ")
+    confirm = getpass.getpass("Нууц үгээ давтан оруулна уу: ")
+    if len(password) < 12:
+        print("Алдаа: нууц үг дор хаяж 12 тэмдэгт байх ёстой.")
         return
-
+    if password != confirm:
+        print("Алдаа: нууц үг таарахгүй байна.")
+        return
+    if not username:
+        print("Алдаа: хэрэглэгчийн нэр хоосон байна.")
+        return
     conn = get_db()
+    try:
+        conn.execute("INSERT INTO admins (username, password_hash, created_at) VALUES (?, ?, ?)",
+                     (username, generate_password_hash(password), datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        conn.commit()
+        print("Админ амжилттай үүслээ. /admin/login хаягаар нэвтэрнэ үү.")
+    except sqlite3.IntegrityError:
+        print("Энэ хэрэглэгчийн нэр аль хэдийн бүртгэлтэй байна.")
+    finally:
+        conn.close()
 
-    existing = conn.execute(
-        "SELECT id FROM admins WHERE username = ?",
-        (admin_username,)
-    ).fetchone()
-
-    password_hash = generate_password_hash(admin_password)
-
-    if existing:
-        conn.execute(
-            "UPDATE admins SET password_hash = ? WHERE username = ?",
-            (password_hash, admin_username)
-        )
-        print("Admin password updated.")
-    else:
-        conn.execute(
-            """INSERT INTO admins
-               (username, password_hash, created_at)
-               VALUES (?, ?, ?)""",
-            (admin_username, password_hash, datetime.now().isoformat())
-        )
-        print("Admin created.")
-
-    conn.commit()
-    conn.close()
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if "admin_id" in session:
@@ -231,11 +216,6 @@ def delete_application(application_id):
     conn.close()
     return redirect(url_for("admin_dashboard", q=request.form.get("q", "")))
 
-init_db()
-ensure_admin()
 if __name__ == "__main__":
-    app.run(
-        debug=true,
-        host="127.0.0.1",
-        port=int(os.environ.get("PORT", 5000))
-    )
+    init_db()
+    app.run(debug=True, host="127.0.0.1", port=5000)
