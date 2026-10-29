@@ -7,7 +7,12 @@ from datetime import datetime
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "database.db"
+DB_PATH = Path(
+    os.environ.get(
+        "DATABASE_PATH",
+        str(BASE_DIR / "database.db")
+    )
+)
 
 app = Flask(__name__)
 # Үйлдвэрлэлийн орчинд SECRET_KEY-г environment variable-аас тохируулна.
@@ -128,40 +133,36 @@ def contact():
     return render_template("contact.html", title="Холбоо барих")
     
 @app.cli.command("create-admin")
-def create_admin():
-    init_db()
-
-    import os
-
-    admin_username = os.environ.get("ADMIN_USERNAME", "ochir")
+def ensure_admin():
+    admin_username = os.environ.get("ADMIN_USERNAME", "ochir").strip()
     admin_password = os.environ.get("ADMIN_PASSWORD", "ochirjk12345")
 
-    if not admin_password:
-        print("ADMIN_PASSWORD тохируулаагүй байна.")
+    if not admin_username or not admin_password:
+        print("ADMIN_USERNAME эсвэл ADMIN_PASSWORD тохируулаагүй байна.")
         return
 
     conn = get_db()
 
     try:
-        existing = conn.execute(
-            "SELECT id FROM admins WHERE username = ?",
-            (admin_username,)
-        ).fetchone()
+        password_hash = generate_password_hash(admin_password)
 
-        if not existing:
-            conn.execute(
-                """
-                INSERT INTO admins
-                (username, password_hash, created_at)
-                VALUES (?, ?, ?)
-                """,
-                (
-                    admin_username,
-                    generate_password_hash(admin_password),
-                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                )
+        conn.execute(
+            """
+            INSERT INTO admins (username, password_hash, created_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(username)
+            DO UPDATE SET password_hash = excluded.password_hash
+            """,
+            (
+                admin_username,
+                password_hash,
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
-            conn.commit()
+        )
+
+        conn.commit()
+        print("Админы бүртгэл амжилттай тохируулагдлаа.")
+
     finally:
         conn.close()
 @app.route("/admin/login", methods=["GET", "POST"])
@@ -225,6 +226,10 @@ def delete_application(application_id):
     return redirect(url_for("admin_dashboard", q=request.form.get("q", "")))
 
 init_db()
-
+ensure_admin()
 if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    app.run(
+        debug=False,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
+    )
