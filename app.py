@@ -133,9 +133,13 @@ def contact():
     return render_template("contact.html", title="Холбоо барих")
     
 @app.cli.command("create-admin")
-def ensure_admin():
-    admin_username = os.environ.get("ADMIN_USERNAME", "ochir").strip()
-    admin_password = os.environ.get("ADMIN_PASSWORD", "ochirjk12345")
+def create_admin():
+    init_db()
+
+    import os
+
+    admin_username = os.environ.get("ADMIN_USERNAME")
+    admin_password = os.environ.get("ADMIN_PASSWORD")
 
     if not admin_username or not admin_password:
         print("ADMIN_USERNAME эсвэл ADMIN_PASSWORD тохируулаагүй байна.")
@@ -143,28 +147,30 @@ def ensure_admin():
 
     conn = get_db()
 
-    try:
-        password_hash = generate_password_hash(admin_password)
+    existing = conn.execute(
+        "SELECT id FROM admins WHERE username = ?",
+        (admin_username,)
+    ).fetchone()
 
+    password_hash = generate_password_hash(admin_password)
+
+    if existing:
         conn.execute(
-            """
-            INSERT INTO admins (username, password_hash, created_at)
-            VALUES (?, ?, ?)
-            ON CONFLICT(username)
-            DO UPDATE SET password_hash = excluded.password_hash
-            """,
-            (
-                admin_username,
-                password_hash,
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            )
+            "UPDATE admins SET password_hash = ? WHERE username = ?",
+            (password_hash, admin_username)
         )
+        print("Admin password updated.")
+    else:
+        conn.execute(
+            """INSERT INTO admins
+               (username, password_hash, created_at)
+               VALUES (?, ?, ?)""",
+            (admin_username, password_hash, datetime.now().isoformat())
+        )
+        print("Admin created.")
 
-        conn.commit()
-        print("Админы бүртгэл амжилттай тохируулагдлаа.")
-
-    finally:
-        conn.close()
+    conn.commit()
+    conn.close()
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if "admin_id" in session:
