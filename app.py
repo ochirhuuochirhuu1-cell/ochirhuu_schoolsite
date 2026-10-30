@@ -55,7 +55,8 @@ def init_db():
     """)
     conn.commit()
     conn.close() 
-
+# Өгөгдлийн сангийн хүснэгтүүдийг үүсгэнэ
+init_db()
 
 def admin_required(view):
     @wraps(view)
