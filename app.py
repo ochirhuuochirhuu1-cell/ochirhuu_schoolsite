@@ -6,8 +6,12 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "database.db"
+DB_PATH = Path(
+    os.environ.get(
+        "DB_PATH",
+        str(BASE_DIR / "database.db")
+    )
+)
 
 app = Flask(__name__)
 # Үйлдвэрлэлийн орчинд SECRET_KEY-г environment variable-аас тохируулна.
