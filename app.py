@@ -157,6 +157,8 @@ def create_admin():
         print("Энэ хэрэглэгчийн нэр аль хэдийн бүртгэлтэй байна.")
         finally:
         conn.close()
+
+    
     def ensure_admin():
     username = os.environ.get("ADMIN_USERNAME")
     password = os.environ.get("ADMIN_PASSWORD")
