@@ -167,8 +167,8 @@ def create_admin():
 
 
 def ensure_admin():
-    username = os.environ.get("ADMIN_USERNAME")
-    password = os.environ.get("ADMIN_PASSWORD")
+    username = os.environ.get("ADMIN_USERNAME", "").strip()
+    password = os.environ.get("ADMIN_PASSWORD", "")
 
     if not username or not password:
         return
