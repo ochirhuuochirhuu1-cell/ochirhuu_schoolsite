@@ -254,7 +254,14 @@ def delete_application(application_id):
     conn.close()
     return redirect(url_for("admin_dashboard", q=request.form.get("q", "")))
 
+# Database болон Admin тохиргоо
+init_db()
+ensure_admin()
+
 if __name__ == "__main__":
-    init_db()
-    ensure_admin()
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    app.run(
+        debug=True,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
+    )
+    
