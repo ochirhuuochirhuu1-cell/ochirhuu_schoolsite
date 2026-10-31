@@ -189,6 +189,7 @@ else:
     )
 
 conn.commit()
+finally:
 conn.close()
 
 @app.route("/admin/login", methods=["GET", "POST"])
