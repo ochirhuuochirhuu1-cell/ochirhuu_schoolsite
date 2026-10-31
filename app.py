@@ -170,21 +170,24 @@ def create_admin():
     ).fetchone()
 
     if existing is None:
-        password_hash = generate_password_hash(password)
-
-        conn.execute(
-            """INSERT INTO admins
-            (username, password_hash, created_at)
-            VALUES (?, ?, ?)""",
-            (
-                username,
-                password_hash,
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            )
+    conn.execute(
+        """INSERT INTO admins
+        (username, password_hash, created_at)
+        VALUES (?, ?, ?)""",
+        (
+            username,
+            generate_password_hash(password),
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
+    )
+else:
+    conn.execute(
+        "UPDATE admins SET password_hash = ? WHERE username = ?",
+        (generate_password_hash(password), username)
+    )
 
-    conn.commit()
-    conn.close()
+conn.commit()
+conn.close()
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
@@ -248,4 +251,5 @@ def delete_application(application_id):
 
 if __name__ == "__main__":
     init_db()
+    ensure_admin()
     app.run(debug=True, host="127.0.0.1", port=5000)
