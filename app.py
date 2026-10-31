@@ -132,42 +132,19 @@ def contact():
 # Анхны админ үүсгэх: командын мөрөөс `flask --app app create-admin` ажиллуулна.
 @app.cli.command("create-admin")
 def create_admin():
-    """Админы хэрэглэгч үүсгэнэ. Нууц үгийг терминал дээр нууж асууна."""
     import getpass
+
     init_db()
-    username = input("Админ хэрэглэгчийн нэр: ").strip()
-    password = getpass.getpass("Шинэ нууц үг (дор хаяж 12 тэмдэгт): ")
-    confirm = getpass.getpass("Нууц үгээ давтан оруулна уу: ")
-    if len(password) < 12:
-        print("Алдаа: нууц үг дор хаяж 12 тэмдэгт байх ёстой.")
+
+    username = input("Админы нэр: ").strip()
+    password = getpass.getpass("Нууц үг (12 тэмдэгтээс дээш): ")
+    confirm = getpass.getpass("Нууц үгээ давтана уу: ")
+
+    if len(password) < 12 or password != confirm or not username:
+        print("Оруулсан мэдээллээ шалгана уу.")
         return
-    if password != confirm:
-        print("Алдаа: нууц үг таарахгүй байна.")
-        return
-    if not username:
-        print("Алдаа: хэрэглэгчийн нэр хоосон байна.")
-        return
+
     conn = get_db()
-    try:
-        conn.execute("INSERT INTO admins (username, password_hash, created_at) VALUES (?, ?, ?)",
-                     (username, generate_password_hash(password), datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-        conn.commit()
-        print("Админ амжилттай үүслээ. /admin/login хаягаар нэвтэрнэ үү.")
-    except sqlite3.IntegrityError:
-        print("Энэ хэрэглэгчийн нэр аль хэдийн бүртгэлтэй байна.")
-        finally:
-        conn.close()
-
-    
-    def ensure_admin():
-    username = os.environ.get("ADMIN_USERNAME")
-    password = os.environ.get("ADMIN_PASSWORD")
-
-    if not username or not password:
-        return
-
-        conn = get_db()
-
     try:
         conn.execute(
             """INSERT INTO admins
@@ -183,7 +160,47 @@ def create_admin():
         print("Админ амжилттай үүслээ.")
 
     except sqlite3.IntegrityError:
-        print("Энэ хэрэглэгчийн нэр аль хэдийн бүртгэлтэй байна.")
+        print("Энэ нэр бүртгэлтэй байна.")
+
+    finally:
+        conn.close()
+
+
+def ensure_admin():
+    username = os.environ.get("ADMIN_USERNAME")
+    password = os.environ.get("ADMIN_PASSWORD")
+
+    if not username or not password:
+        return
+
+    conn = get_db()
+
+    try:
+        existing = conn.execute(
+            "SELECT id FROM admins WHERE username = ?",
+            (username,)
+        ).fetchone()
+
+        password_hash = generate_password_hash(password)
+
+        if existing is None:
+            conn.execute(
+                """INSERT INTO admins
+                (username, password_hash, created_at)
+                VALUES (?, ?, ?)""",
+                (
+                    username,
+                    password_hash,
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                )
+            )
+        else:
+            conn.execute(
+                "UPDATE admins SET password_hash = ? WHERE username = ?",
+                (password_hash, username)
+            )
+
+        conn.commit()
 
     finally:
         conn.close()
