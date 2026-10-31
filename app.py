@@ -155,8 +155,36 @@ def create_admin():
         print("Админ амжилттай үүслээ. /admin/login хаягаар нэвтэрнэ үү.")
     except sqlite3.IntegrityError:
         print("Энэ хэрэглэгчийн нэр аль хэдийн бүртгэлтэй байна.")
-    finally:
-        conn.close()
+    def ensure_admin():
+    username = os.environ.get("ADMIN_USERNAME")
+    password = os.environ.get("ADMIN_PASSWORD")
+
+    if not username or not password:
+        return
+
+    conn = get_db()
+
+    existing = conn.execute(
+        "SELECT id FROM admins WHERE username = ?",
+        (username,)
+    ).fetchone()
+
+    if existing is None:
+        password_hash = generate_password_hash(password)
+
+        conn.execute(
+            """INSERT INTO admins
+            (username, password_hash, created_at)
+            VALUES (?, ?, ?)""",
+            (
+                username,
+                password_hash,
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            )
+        )
+
+    conn.commit()
+    conn.close()
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
