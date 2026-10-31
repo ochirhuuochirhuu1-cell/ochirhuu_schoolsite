@@ -166,34 +166,28 @@ def create_admin():
     if not username or not password:
         return
 
-    conn = get_db()
+        conn = get_db()
 
-    existing = conn.execute(
-        "SELECT id FROM admins WHERE username = ?",
-        (username,)
-    ).fetchone()
-
-    if existing is None:
-    conn.execute(
-        """INSERT INTO admins
-        (username, password_hash, created_at)
-        VALUES (?, ?, ?)""",
-        (
-            username,
-            generate_password_hash(password),
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        conn.execute(
+            """INSERT INTO admins
+            (username, password_hash, created_at)
+            VALUES (?, ?, ?)""",
+            (
+                username,
+                generate_password_hash(password),
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            )
         )
-    )
-else:
-    conn.execute(
-        "UPDATE admins SET password_hash = ? WHERE username = ?",
-        (generate_password_hash(password), username)
-    )
+        conn.commit()
+        print("Админ амжилттай үүслээ.")
 
-conn.commit()
-finally:
-conn.close()
+    except sqlite3.IntegrityError:
+        print("Энэ хэрэглэгчийн нэр аль хэдийн бүртгэлтэй байна.")
 
+    finally:
+        conn.close()
+        
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if "admin_id" in session:
